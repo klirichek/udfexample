@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="udfexample" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="udfexample" />
+    <working_directory value="$PROJECT_DIR$/" />
+    <go_parameters value="-buildmode=c-shared" />
+    <useCustomBuildTags value="true" />
+    <kind value="DIRECTORY" />
+    <filePath value="$PROJECT_DIR$/funcexample.go" />
+    <package value="udfexample" />
+    <directory value="$PROJECT_DIR$/" />
+    <output_directory value="/work/udf/" />
+    <option name="run" value="false" />
+    <method v="2" />
+  </configuration>
+</component>
