@@ -60,7 +60,7 @@ type ERR_MSG C.char
 // Report packs message from go string into C string buffer to be returned from UDF function.
 // It returns 1 in order to be used as shortcut (i.e. 'return msg.Report(...)' instead of 'msg.Report(...); return 1'
 func (errmsg *ERR_MSG) say(message string) int32 {
-	C.cmsg((*C.char)(errmsg), message)
+	putstr((*C.char)(errmsg), message)
 	return 1
 }
 
@@ -121,7 +121,7 @@ func (args *SPH_UDF_ARGS) lenval(idx int) int {
 
 // return name of the arg by idx
 func (args *SPH_UDF_ARGS) arg_name(idx int) string {
-	return C.GoString((*C.char)(args.nameptr(idx)))
+	return GoString((*C.char)(args.nameptr(idx)))
 }
 
 // return type of the arg by idx
@@ -132,11 +132,7 @@ func (args *SPH_UDF_ARGS) arg_type(idx int) SPH_UDF_TYPE {
 // return string value by idx
 // it not copies value, but use backend C string instead
 func (args *SPH_UDF_ARGS) stringval(idx int) string {
-	var s string
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	hdr.Data = uintptr(args.valueptr(idx))
-	hdr.Len = args.lenval(idx)
-	return s
+	return GoStringN((*C.char)(args.valueptr(idx)), args.lenval(idx))
 }
 
 // return slice value by idx
@@ -196,30 +192,48 @@ func (init *SPH_UDF_INIT) getuint32() uint32 {
 	return *(*uint32)(unsafe.Pointer(&init.func_data))
 }
 
-type SPH_RANKER_INIT C.SPH_RANKER_INIT
+// generic stuff
 
+type SPH_RANKER_INIT C.SPH_RANKER_INIT
 type SPH_RANKER_HIT C.SPH_RANKER_HIT
 
+// push warning message back to daemon
 var cblog *C.sphinx_log_fn
 
 func sphWarning(msg string) {
 	C.logmsg(msg, cblog)
 }
 
-func strlen(param *C.char) int {
-	return int(C.strlen(param))
+// C.GoString works by copying backend data.
+// We, in turn, make just a tiny wrapper
+func GoString(str *C.char) string {
+	var rawstring string
+	hdr := (*reflect.StringHeader)(unsafe.Pointer(&rawstring))
+	hdr.Data = uintptr(unsafe.Pointer(str))
+	hdr.Len = int(C.strlen(str))
+	return rawstring
 }
 
+func GoStringN(str *C.char, len int) string {
+	var rawstring string
+	hdr := (*reflect.StringHeader)(unsafe.Pointer(&rawstring))
+	hdr.Data = uintptr(unsafe.Pointer(str))
+	hdr.Len = len
+	return rawstring
+}
+
+// put given mesage into C string destination
 func putstr(dst *C.char, message string) {
 	C.cmsg(dst, message)
 }
 
-func malloc(param int) unsafe.Pointer {
-	return C.malloc((C.ulong)(param))
+// wrappers over C malloc and free.
+func malloc(param int) uintptr {
+	return uintptr(C.malloc((C.ulong)(param)))
 }
 
-func free(param unsafe.Pointer) {
-	C.free(param)
+func free(param uintptr) {
+	C.free(unsafe.Pointer(param))
 }
 
 // global functions that must be in any udf plugin library

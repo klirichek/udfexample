@@ -3,8 +3,6 @@ package main
 import "C"
 import (
 	"fmt"
-	"reflect"
-	"unsafe"
 )
 
 // This is query tokenizer filter example.
@@ -23,7 +21,7 @@ import (
 func queryshow_init(ppuserdata *uintptr, max_len int32, options *C.char, errmsg *ERR_MSG) int32 {
 
 	sphWarning(fmt.Sprintf("Called queryshow_init: %X, max_len %d, options %s, err %p",
-		*ppuserdata, max_len, C.GoString(options), errmsg))
+		*ppuserdata, max_len, GoString(options), errmsg))
 	return 0
 }
 
@@ -32,12 +30,7 @@ func queryshow_init(ppuserdata *uintptr, max_len int32, options *C.char, errmsg 
 //export queryshow_pre_morph
 func queryshow_pre_morph(puserdata uintptr, token *C.char, stopword *int32) {
 
-	// we got C string, but want to operate with Go string. So, wrap it first
-	var rawtoken string
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&rawtoken))
-	hdr.Data = uintptr(unsafe.Pointer(token))
-	hdr.Len = strlen(token)
-
+	rawtoken := GoString(token)
 	// let's for example return stopword for russian word "сталь"
 	if rawtoken == "сталь" {
 		*stopword = 1
@@ -54,10 +47,7 @@ func queryshow_pre_morph(puserdata uintptr, token *C.char, stopword *int32) {
 func queryshow_post_morph(puserdata uintptr, token *C.char, stopword *int32) int32 {
 
 	// we got C string, but want to operate with Go string. So, wrap it first
-	var rawtoken string
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&rawtoken))
-	hdr.Data = uintptr(unsafe.Pointer(token))
-	hdr.Len = strlen(token)
+	rawtoken := GoString(token)
 
 	ires := int32(0)
 	// let's for example return stopword for russian word "сталь"
@@ -81,19 +71,8 @@ func queryshow_post_morph(puserdata uintptr, token *C.char, stopword *int32) int
 //export queryshow_push_token
 func queryshow_push_token(puserdata uintptr, token *C.char, delta *int32, rawtoken *C.char, rawtokenlen int32) *C.char {
 
-	// we got C string, but want to operate with Go string. So, wrap it first
-	var crawtoken string
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&crawtoken))
-	hdr.Data = uintptr(unsafe.Pointer(rawtoken))
-	hdr.Len = int(rawtokenlen)
-
-	var ctoken string
-	hdr1 := (*reflect.StringHeader)(unsafe.Pointer(&ctoken))
-	hdr1.Data = uintptr(unsafe.Pointer(token))
-	hdr1.Len = strlen(token)
-
 	sphWarning(fmt.Sprintf("%X Called queryshow_push_token: token '%s', rawtoken '%s'",
-		puserdata, ctoken, crawtoken))
+		puserdata, GoString(token), GoStringN(rawtoken, int(rawtokenlen))))
 
 	return token
 }

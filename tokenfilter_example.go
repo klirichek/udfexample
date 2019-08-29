@@ -3,7 +3,6 @@ package main
 import "C"
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"unsafe"
 )
@@ -34,7 +33,7 @@ import (
 func hideemail_init(ppuserdata *uintptr, num_fields int32, field_names **C.char, options *C.char, errmsg *ERR_MSG) int32 {
 
 	sphWarning(fmt.Sprintf("Called hideemail_init: %X, %d, %p, %p:%s, %p",
-		*ppuserdata, num_fields, field_names, options, C.GoString(options), errmsg))
+		*ppuserdata, num_fields, field_names, options, GoString(options), errmsg))
 
 	// initialize storage in C memory. That is necessary, because functions from viewpoint of Go lang are standalone,
 	// so if we just return a pointer to Go allocated structure, gc may accidentally kill it.
@@ -42,7 +41,7 @@ func hideemail_init(ppuserdata *uintptr, num_fields int32, field_names **C.char,
 	// storage (map), protected by mutexes. To avoid all this stuff we just use plain C 'malloc' and keep allocated
 	// pointer in user data.
 	if *ppuserdata == 0 {
-		*ppuserdata = uintptr(malloc(256))
+		*ppuserdata = malloc(256)
 	}
 	return 0
 }
@@ -58,11 +57,7 @@ func hideemail_push_token(puserdata uintptr, token *C.char, extra *int32, delta 
 	}
 
 	// we got C string, but want to operate with Go string. So, wrap it first
-	var rawtoken string
-	hdr := (*reflect.StringHeader)(unsafe.Pointer(&rawtoken))
-	hdr.Data = uintptr(unsafe.Pointer(token))
-	hdr.Len = strlen(token)
-
+	rawtoken := GoString(token)
 	sphWarning(fmt.Sprintf("Called hideemail_push_token with %s, %d, %d", rawtoken, *extra, *delta))
 
 	parts := strings.Split(rawtoken, "@")
@@ -105,6 +100,6 @@ func hideemail_begin_document(puserdata uintptr, options *C.char, errmsg *ERR_MS
 
 // here we have to free allocated resources
 //export hideemail_deinit
-func hideemail_deinit(puserdata *byte) {
-	free(unsafe.Pointer(puserdata))
+func hideemail_deinit(puserdata uintptr) {
+	free(puserdata)
 }

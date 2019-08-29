@@ -22,7 +22,7 @@ func (ranker *SPH_RANKER_INIT) String() string {
 	}
 	line := "weights: [" + strings.Join(sweights, ",") + "], "
 	line += fmt.Sprintf("options: %s, payload_mask: %d, num_query_words: %d, max_qpos: %d",
-		C.GoString(ranker.options), ranker.payload_mask, ranker.num_query_words, ranker.max_qpos)
+		GoString(ranker.options), ranker.payload_mask, ranker.num_query_words, ranker.max_qpos)
 	return line
 }
 
