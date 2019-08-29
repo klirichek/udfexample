@@ -16,7 +16,7 @@ func avgmva_init(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32 
 	// store our mva vs mva64 flag to func_data
 	// (strictly speaking that is not necessary, since we always can fetch value from args,
 	// but let it be for education)
-	init.setuint32(args.arg_type(0))
+	init.setuint32(uint32(args.arg_type(0)))
 	return 0
 }
 
@@ -34,7 +34,7 @@ func avgmva(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, err *ERR_FLAG) float64 {
 		return result
 	}
 
-	is64 := init.getuint32()
+	is64 := SPH_UDF_TYPE(init.getuint32())
 	switch is64 {
 	case SPH_UDF_TYPE_UINT32SET:
 		{

@@ -40,16 +40,18 @@ const (
 	SPH_UDF_VERSION = C.SPH_UDF_VERSION
 )
 
+type SPH_UDF_TYPE uint32
+
 /// UDF argument and result value types
 const (
-	SPH_UDF_TYPE_UINT32    = uint32(C.SPH_UDF_TYPE_UINT32)    ///< unsigned 32-bit integer
-	SPH_UDF_TYPE_UINT32SET = uint32(C.SPH_UDF_TYPE_UINT32SET) ///< sorted set of unsigned 32-bit integers
-	SPH_UDF_TYPE_INT64     = uint32(C.SPH_UDF_TYPE_INT64)     ///< signed 64-bit integer
-	SPH_UDF_TYPE_FLOAT     = uint32(C.SPH_UDF_TYPE_FLOAT)     ///< single-precision IEEE 754 float
-	SPH_UDF_TYPE_STRING    = uint32(C.SPH_UDF_TYPE_STRING)    ///< non-ASCIIZ string, with a separately stored length
-	SPH_UDF_TYPE_INT64SET  = uint32(C.SPH_UDF_TYPE_INT64SET)  ///< sorted set of signed 64-bit integers
-	SPH_UDF_TYPE_FACTORS   = uint32(C.SPH_UDF_TYPE_FACTORS)   ///< packed ranking factors
-	SPH_UDF_TYPE_JSON      = uint32(C.SPH_UDF_TYPE_JSON)      ///< whole json or particular field as a string
+	SPH_UDF_TYPE_UINT32    = SPH_UDF_TYPE(C.SPH_UDF_TYPE_UINT32)    ///< unsigned 32-bit integer
+	SPH_UDF_TYPE_UINT32SET = SPH_UDF_TYPE(C.SPH_UDF_TYPE_UINT32SET) ///< sorted set of unsigned 32-bit integers
+	SPH_UDF_TYPE_INT64     = SPH_UDF_TYPE(C.SPH_UDF_TYPE_INT64)     ///< signed 64-bit integer
+	SPH_UDF_TYPE_FLOAT     = SPH_UDF_TYPE(C.SPH_UDF_TYPE_FLOAT)     ///< single-precision IEEE 754 float
+	SPH_UDF_TYPE_STRING    = SPH_UDF_TYPE(C.SPH_UDF_TYPE_STRING)    ///< non-ASCIIZ string, with a separately stored length
+	SPH_UDF_TYPE_INT64SET  = SPH_UDF_TYPE(C.SPH_UDF_TYPE_INT64SET)  ///< sorted set of signed 64-bit integers
+	SPH_UDF_TYPE_FACTORS   = SPH_UDF_TYPE(C.SPH_UDF_TYPE_FACTORS)   ///< packed ranking factors
+	SPH_UDF_TYPE_JSON      = SPH_UDF_TYPE(C.SPH_UDF_TYPE_JSON)      ///< whole json or particular field as a string
 )
 
 // ERR_MSG is the buffer for returning error messages from _init functions.
@@ -88,13 +90,15 @@ func (args *SPH_UDF_ARGS) Arg_count() int32 {
 }
 
 // internal: returns pointer go arg_type
-func (args *SPH_UDF_ARGS) typeptr(idx int) *uint32 {
-	return (*uint32)(unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_types)) + unsafe.Sizeof(*args.arg_types)*uintptr(idx)))
+func (args *SPH_UDF_ARGS) typeptr(idx int) *SPH_UDF_TYPE {
+	return (*SPH_UDF_TYPE)(unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_types)) +
+		unsafe.Sizeof(*args.arg_types)*uintptr(idx)))
 }
 
 // internal: returns unsafe pointer go arg_value
 func (args *SPH_UDF_ARGS) valueptr(idx int) unsafe.Pointer {
-	ptr := unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_values)) + unsafe.Sizeof(*args.arg_values)*uintptr(idx))
+	ptr := unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_values)) +
+		unsafe.Sizeof(*args.arg_values)*uintptr(idx))
 	return *(*unsafe.Pointer)(ptr)
 }
 
@@ -111,7 +115,8 @@ func (args *SPH_UDF_ARGS) nameptr(idx int) unsafe.Pointer {
 
 // internal: returns len of arg_value
 func (args *SPH_UDF_ARGS) lenval(idx int) int {
-	return int(*(*int32)(unsafe.Pointer(uintptr(unsafe.Pointer(args.str_lengths)) + unsafe.Sizeof(*args.str_lengths)*uintptr(idx))))
+	return int(*(*int32)(unsafe.Pointer(uintptr(unsafe.Pointer(args.str_lengths)) +
+		unsafe.Sizeof(*args.str_lengths)*uintptr(idx))))
 }
 
 // return name of the arg by idx
@@ -120,7 +125,7 @@ func (args *SPH_UDF_ARGS) arg_name(idx int) string {
 }
 
 // return type of the arg by idx
-func (args *SPH_UDF_ARGS) arg_type(idx int) uint32 {
+func (args *SPH_UDF_ARGS) arg_type(idx int) SPH_UDF_TYPE {
 	return *args.typeptr(idx)
 }
 
@@ -190,6 +195,10 @@ func (init *SPH_UDF_INIT) getvalue() uintptr {
 func (init *SPH_UDF_INIT) getuint32() uint32 {
 	return *(*uint32)(unsafe.Pointer(&init.func_data))
 }
+
+type SPH_RANKER_INIT C.SPH_RANKER_INIT
+
+type SPH_RANKER_HIT C.SPH_RANKER_HIT
 
 var cblog *C.sphinx_log_fn
 

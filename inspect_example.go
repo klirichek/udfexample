@@ -20,26 +20,35 @@ func inspect_init(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32
 	return 0
 }
 
-func type2str(tp uint32) string {
+func (tp SPH_UDF_TYPE) String() string {
 	switch tp {
 
-	case SPH_UDF_TYPE_UINT32: return "UINT32"
-	case SPH_UDF_TYPE_UINT32SET: return "UINT32SET"
-	case SPH_UDF_TYPE_INT64: return "INT64"
-	case SPH_UDF_TYPE_FLOAT: return "FLOAT"
-	case SPH_UDF_TYPE_STRING: return "STRING"
-	case SPH_UDF_TYPE_INT64SET: return "INT64SET"
-	case SPH_UDF_TYPE_FACTORS: return "FACTORS"
-	case SPH_UDF_TYPE_JSON: return "JSON"
-	default: return fmt.Sprintf("unknown(%d)",tp)
+	case SPH_UDF_TYPE_UINT32:
+		return "UINT32"
+	case SPH_UDF_TYPE_UINT32SET:
+		return "UINT32SET"
+	case SPH_UDF_TYPE_INT64:
+		return "INT64"
+	case SPH_UDF_TYPE_FLOAT:
+		return "FLOAT"
+	case SPH_UDF_TYPE_STRING:
+		return "STRING"
+	case SPH_UDF_TYPE_INT64SET:
+		return "INT64SET"
+	case SPH_UDF_TYPE_FACTORS:
+		return "FACTORS"
+	case SPH_UDF_TYPE_JSON:
+		return "JSON"
+	default:
+		return fmt.Sprintf("unknown(%d)", tp)
 	}
 }
 
 func format_mva32(values []uint32) string {
 	var res string
 	res = "("
-	for _,val := range values {
-		res += fmt.Sprintf("%v,",val)
+	for _, val := range values {
+		res += fmt.Sprintf("%v,", val)
 	}
 	res += ")"
 	return res
@@ -48,28 +57,27 @@ func format_mva32(values []uint32) string {
 func format_mva64(values []int64) string {
 	var res string
 	res = "("
-	for _,val := range values {
-		res += fmt.Sprintf("%v,",val)
+	for _, val := range values {
+		res += fmt.Sprintf("%v,", val)
 	}
 	res += ")"
 	return res
 }
 
-
 // here we execute provided action: extract arguments,
 // and make print details about each of them
 //export inspect
 func inspect(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, err *ERR_FLAG) uintptr {
-	var res string;
+	var res string
 	res += fmt.Sprintf("passed %d args\n", args.arg_count)
-	for i:=0; i<int(args.arg_count); i++ {
+	for i := 0; i < int(args.arg_count); i++ {
 		tp := args.arg_type(i)
-		res += fmt.Sprintf ( "arg %d: type %s",i, type2str(tp))
+		res += fmt.Sprintf("arg %d: type %v", i, tp)
 
 		// print len, if necessary
 		switch tp {
 		case SPH_UDF_TYPE_UINT32SET, SPH_UDF_TYPE_STRING, SPH_UDF_TYPE_INT64SET, SPH_UDF_TYPE_JSON:
-			res += fmt.Sprintf ( ", len %d",args.lenval(i))
+			res += fmt.Sprintf(", len %d", args.lenval(i))
 		default:
 		}
 		res += ": "
@@ -78,26 +86,25 @@ func inspect(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, err *ERR_FLAG) uintptr {
 		// here you can see how different types may be extracted from args
 		switch tp {
 		case SPH_UDF_TYPE_UINT32:
-			res += fmt.Sprintf ("%v", *(*uint32)(args.valueptr(i)))
+			res += fmt.Sprintf("%v", *(*uint32)(args.valueptr(i)))
 		case SPH_UDF_TYPE_UINT32SET:
 			res += format_mva32(args.mva32(i))
 		case SPH_UDF_TYPE_INT64:
-			res += fmt.Sprintf ("%v", *(*int64)(args.valueptr(i)))
+			res += fmt.Sprintf("%v", *(*int64)(args.valueptr(i)))
 		case SPH_UDF_TYPE_FLOAT:
-			res += fmt.Sprintf ("%v", *(*float32)(args.valueptr(i)))
+			res += fmt.Sprintf("%v", *(*float32)(args.valueptr(i)))
 		case SPH_UDF_TYPE_STRING, SPH_UDF_TYPE_JSON:
 			res += "'" + args.stringval(i) + "'"
 		case SPH_UDF_TYPE_INT64SET:
 			res += format_mva64(args.mva64(i))
 		case SPH_UDF_TYPE_FACTORS:
-			res += format_factors (args.valueptr(i))
+			res += format_factors(args.valueptr(i))
 		default:
-			res += fmt.Sprintf("other (%d) todo!",tp)
+			res += fmt.Sprintf("other (%d) todo!", tp)
 		}
 
 		res += "\n" // trailing cr
 	}
-
 
 	return args.return_string(res)
 }
