@@ -94,18 +94,18 @@ func (args *SPH_UDF_ARGS) typeptr(idx int) *uint32 {
 
 // internal: returns unsafe pointer go arg_value
 func (args *SPH_UDF_ARGS) valueptr(idx int) unsafe.Pointer {
-	ptr:= unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_values)) + unsafe.Sizeof(*args.arg_values)*uintptr(idx))
+	ptr := unsafe.Pointer(uintptr(unsafe.Pointer(args.arg_values)) + unsafe.Sizeof(*args.arg_values)*uintptr(idx))
 	return *(*unsafe.Pointer)(ptr)
 }
 
 // internal: returns unsafe pointer go arg_name
 func (args *SPH_UDF_ARGS) nameptr(idx int) unsafe.Pointer {
-	base:= uintptr(unsafe.Pointer(args.arg_names))
-	if base==0 {
+	base := uintptr(unsafe.Pointer(args.arg_names))
+	if base == 0 {
 		return nil
 	}
 
-	ptr:= base + unsafe.Sizeof(*args.arg_names)*uintptr(idx)
+	ptr := base + unsafe.Sizeof(*args.arg_names)*uintptr(idx)
 	return *(*unsafe.Pointer)(unsafe.Pointer(ptr))
 }
 
@@ -157,10 +157,9 @@ func (args *SPH_UDF_ARGS) mva64(idx int) []int64 {
 }
 
 // convert Go string into C string result and return it
-func (args *SPH_UDF_ARGS) return_string (result string) uintptr {
-	return uintptr(unsafe.Pointer(C.retmsg(result,args.fn_malloc)))
+func (args *SPH_UDF_ARGS) return_string(result string) uintptr {
+	return uintptr(unsafe.Pointer(C.retmsg(result, args.fn_malloc)))
 }
-
 
 /* UDF initialization
 // -godefs shows this structure here:
@@ -169,7 +168,7 @@ type SPH_UDF_INIT struct {
         Is_const        int8
         Pad_cgo_0       [7]byte
 }
- */
+*/
 type SPH_UDF_INIT C.SPH_UDF_INIT
 
 // set func_data to given value
@@ -193,23 +192,28 @@ func (init *SPH_UDF_INIT) getuint32() uint32 {
 }
 
 var cblog *C.sphinx_log_fn
-func sphWarning (msg string) {
-	C.logmsg(msg,cblog)
+
+func sphWarning(msg string) {
+	C.logmsg(msg, cblog)
 }
 
-func strlen ( param *C.char ) int {
+func strlen(param *C.char) int {
 	return int(C.strlen(param))
 }
 
-func malloc ( param int ) unsafe.Pointer {
+func putstr(dst *C.char, message string) {
+	C.cmsg(dst, message)
+}
+
+func malloc(param int) unsafe.Pointer {
 	return C.malloc((C.ulong)(param))
 }
 
-func free ( param unsafe.Pointer ) {
+func free(param unsafe.Pointer) {
 	C.free(param)
 }
-// global functions that must be in any udf plugin library
 
+// global functions that must be in any udf plugin library
 
 /// UDF version control. Named as LIBRARYNAME_ver (i.e. udfexample_ver in the case)
 /// gets called once when the library is loaded
