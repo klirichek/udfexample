@@ -1,5 +1,6 @@
 package main
 
+import "C"
 import (
 	"fmt"
 	"io/ioutil"
@@ -16,7 +17,8 @@ import (
 // in this function we check only num of args (1) and the type (must be string)
 // Also we set zero to init value
 //export curl_init
-func curl_init(_ *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32 {
+func curl_init(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32 {
+	sphWarning("invoked curl_init")
 	// check argument count
 	if args.arg_count != 1 || args.arg_type(0) != SPH_UDF_TYPE_STRING {
 		return errmsg.say("WEB() requires 1 string argument")
@@ -26,7 +28,7 @@ func curl_init(_ *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32 {
 
 // here we execute provided action: extract arguments, make necessary calculations and return result back
 //export curl
-func curl(_ *SPH_UDF_INIT, args *SPH_UDF_ARGS, errf *ERR_FLAG) uintptr {
+func curl(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errf *ERR_FLAG) uintptr {
 
 	url := args.stringval(0)
 

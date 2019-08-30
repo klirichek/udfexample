@@ -1,5 +1,6 @@
 package main
 
+import "C"
 import "fmt"
 
 // strtoint is example of stateless UDF function. It takes 1 or 2 params and returns integer from hexadecimal string
@@ -16,13 +17,15 @@ import "fmt"
 func strtoint_init(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int32 {
 	switch args.arg_count {
 	case 1:
-		if args.arg_type(0)!=SPH_UDF_TYPE_STRING {
-		return errmsg.say("STRTOINT() requires 1st string argument")
-	}
-	case 2: if args.arg_type(1)!=SPH_UDF_TYPE_STRING {
-		return errmsg.say("STRTOINT() requires 2nd string argument")
-	}
-	default: return errmsg.say("STRTOINT() requires 1 or 2 string arguments")
+		if args.arg_type(0) != SPH_UDF_TYPE_STRING {
+			return errmsg.say("STRTOINT() requires 1st string argument")
+		}
+	case 2:
+		if args.arg_type(1) != SPH_UDF_TYPE_STRING {
+			return errmsg.say("STRTOINT() requires 2nd string argument")
+		}
+	default:
+		return errmsg.say("STRTOINT() requires 1 or 2 string arguments")
 	}
 	return 0
 }
@@ -31,7 +34,7 @@ func strtoint_init(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, errmsg *ERR_MSG) int3
 //export strtoint
 func strtoint(init *SPH_UDF_INIT, args *SPH_UDF_ARGS, err *ERR_FLAG) int64 {
 	fmtstr := "%X"
-	if args.arg_count==2 {
+	if args.arg_count == 2 {
 		fmtstr = args.stringval(1)
 	}
 	var a int64

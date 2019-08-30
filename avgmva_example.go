@@ -1,5 +1,7 @@
 package main
 
+import "C"
+
 // avgmva is example of UDF function working with mva and returning float value
 // You can load it into the daemon with
 //  CREATE FUNCTION avgmva RETURNS FLOAT SONAME 'udfexample.so';
