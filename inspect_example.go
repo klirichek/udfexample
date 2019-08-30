@@ -3,6 +3,7 @@ package main
 import "C"
 import (
 	"fmt"
+	"strings"
 )
 
 // inspect is example of UDF function to inspect different arguments
@@ -45,23 +46,19 @@ func (tp SPH_UDF_TYPE) String() string {
 }
 
 func format_mva32(values []uint32) string {
-	var res string
-	res = "("
-	for _, val := range values {
-		res += fmt.Sprintf("%v,", val)
+	var mvas []string
+	for _, num := range values {
+		mvas = append(mvas, fmt.Sprintf("%d", num))
 	}
-	res += ")"
-	return res
+	return "(" + strings.Join(mvas, ",") + ")"
 }
 
 func format_mva64(values []int64) string {
-	var res string
-	res = "("
-	for _, val := range values {
-		res += fmt.Sprintf("%v,", val)
+	var mvas []string
+	for _, num := range values {
+		mvas = append(mvas, fmt.Sprintf("%d", num))
 	}
-	res += ")"
-	return res
+	return "(" + strings.Join(mvas, ",") + ")"
 }
 
 // here we execute provided action: extract arguments,

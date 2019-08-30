@@ -138,23 +138,13 @@ func (args *SPH_UDF_ARGS) stringval(idx int) string {
 // return slice value by idx
 // it not copies value, but use backend C string instead
 func (args *SPH_UDF_ARGS) mva32(idx int) []uint32 {
-	var mvas []uint32
-	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&mvas))
-	sliceHeader.Cap = args.lenval(idx)
-	sliceHeader.Len = args.lenval(idx)
-	sliceHeader.Data = uintptr(args.valueptr(idx))
-	return mvas
+	return GoSliceUint32(args.valueptr(idx), args.lenval(idx))
 }
 
 // return slice value by idx
 // it not copies value, but use backend C string instead
 func (args *SPH_UDF_ARGS) mva64(idx int) []int64 {
-	var mvas []int64
-	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&mvas))
-	sliceHeader.Cap = args.lenval(idx)
-	sliceHeader.Len = args.lenval(idx)
-	sliceHeader.Data = uintptr(args.valueptr(idx))
-	return mvas
+	return GoSliceInt64(args.valueptr(idx), args.lenval(idx))
 }
 
 // convert Go string into C string result and return it
@@ -220,6 +210,34 @@ func GoStringN(str *C.char, len int) string {
 	hdr.Data = uintptr(unsafe.Pointer(str))
 	hdr.Len = len
 	return rawstring
+}
+
+// return slice value from raw C pointer and length
+func GoSliceInt32(data unsafe.Pointer, len int) []int32 {
+	var slice []int32
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
+	sliceHeader.Cap = len
+	sliceHeader.Len = len
+	sliceHeader.Data = uintptr(data)
+	return slice
+}
+
+func GoSliceUint32(data unsafe.Pointer, len int) []uint32 {
+	var slice []uint32
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
+	sliceHeader.Cap = len
+	sliceHeader.Len = len
+	sliceHeader.Data = uintptr(data)
+	return slice
+}
+
+func GoSliceInt64(data unsafe.Pointer, len int) []int64 {
+	var slice []int64
+	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&slice))
+	sliceHeader.Cap = len
+	sliceHeader.Len = len
+	sliceHeader.Data = uintptr(data)
+	return slice
 }
 
 // put given mesage into C string destination

@@ -3,19 +3,13 @@ package main
 import "C"
 import (
 	"fmt"
-	"reflect"
 	"strings"
 	"unsafe"
 )
 
 func (ranker *SPH_RANKER_INIT) String() string {
 
-	var weights []int32
-	sliceHeader := (*reflect.SliceHeader)(unsafe.Pointer(&weights))
-	sliceHeader.Cap = int(ranker.num_field_weights)
-	sliceHeader.Len = int(ranker.num_field_weights)
-	sliceHeader.Data = uintptr(unsafe.Pointer(ranker.field_weights))
-
+	weights := GoSliceUint32(unsafe.Pointer(ranker.field_weights), int(ranker.num_field_weights))
 	var sweights []string
 	for _, num := range weights {
 		sweights = append(sweights, fmt.Sprintf("%d", num))

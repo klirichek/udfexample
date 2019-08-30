@@ -10,6 +10,7 @@ Manticore Search is an open source search server designed to be fast, scalable a
 * Stateless UDF example 'strtoint' which transforms string to number using Go fmt parameter
 * Stateful UDF example 'avgmva' which calculates average of provided MVA attribute
 * Stateless UDF example 'inspect' which just parses parameters and report them back to daemon
+* Stateless UDF example 'curl' which downloads given resource and returns it, if it is text
 * Stateful UDF example 'sequence' which returns monotonically growing integers
 * tokenizer plugin example 'hideemail' converts token 'any@space.io' to 'mailto:any@space.io' and drop any other emails
 * query tokenizer plugin example 'queryshow' just displays back all calls and parameters
